@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 )
 
 type Page struct {
@@ -19,6 +21,7 @@ func (p *Page) save() (err error) {
 }
 
 var templates = template.Must(template.ParseFiles("./templates/edit.html", "./templates/view.html"))
+var validPath = regexp.MustCompile("^(edit|save|view)/([a-zA-z0-9]+)$")
 
 func loadPage(title string) (page *Page, err error) {
 	filename := title + ".txt"
@@ -34,6 +37,15 @@ func loadPage(title string) (page *Page, err error) {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+}
+
+func getTitle(w http.ResponseWriter, r *http.Request) (title string, err error) {
+	m := validPath.FindStringSubmatch(r.URL.Path)
+	if m == nil {
+		http.NotFound(w, r)
+		return "", errors.New("invalid Page Title")
+	}
+	return m[2], nil
 }
 
 func renderTemplate(w http.ResponseWriter, templateName string, p *Page) {
