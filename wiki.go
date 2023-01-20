@@ -12,11 +12,14 @@ func (p *Page) save() (err error) {
 	return os.WriteFile(filename, p.Body, 0600)
 }
 
-func loadPage(title string) (page *Page) {
+func loadPage(title string) (page *Page, err error) {
 	filename := title + ".txt"
-	body, _ := os.ReadFile(filename)
+	body, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
 	return &Page{
 		Title: title,
 		Body:  body,
-	}
+	}, nil
 }
