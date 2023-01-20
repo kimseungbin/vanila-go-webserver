@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -45,7 +46,8 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		p = &Page{Title: title}
 	}
-	fmt.Fprintf(w, "<h1>Editing %s</h1>\n<form action='save/%s' method='post'>\n    <textarea name='body'>%s</textarea>\n    <input type='submit' value='Save'/>\n</form>", p.Title, p.Title, p.Body)
+	t, _ := template.ParseFiles("./templates/edit.html")
+	t.Execute(w, p)
 }
 
 func main() {
