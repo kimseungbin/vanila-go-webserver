@@ -18,6 +18,8 @@ func (p *Page) save() (err error) {
 	return os.WriteFile(filename, p.Body, 0600)
 }
 
+var templates = template.Must(template.ParseFiles("./templates/edit.html", "./templates/view.html"))
+
 func loadPage(title string) (page *Page, err error) {
 	filename := title + ".txt"
 	body, err := os.ReadFile(filename)
@@ -34,13 +36,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
 }
 
-func renderTemplate(w http.ResponseWriter, templateFileName string, p *Page) {
-	t, err := template.ParseFiles("./templates/" + templateFileName + ".html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = t.Execute(w, p)
+func renderTemplate(w http.ResponseWriter, templateName string, p *Page) {
+	err := templates.ExecuteTemplate(w, templateName+".html", p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
