@@ -11,3 +11,12 @@ func (p *Page) save() (err error) {
 	filename := p.Title + ".txt"
 	return os.WriteFile(filename, p.Body, 0600)
 }
+
+func loadPage(title string) (page *Page) {
+	filename := title + ".txt"
+	body, _ := os.ReadFile(filename)
+	return &Page{
+		Title: title,
+		Body:  body,
+	}
+}
