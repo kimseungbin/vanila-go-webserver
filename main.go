@@ -55,7 +55,18 @@ func renderTemplate(w http.ResponseWriter, templateName string, p *Page) {
 	}
 }
 
-func saveHandler(w http.ResponseWriter, r *http.Request) {
+func makeHandler(fn func(w http.ResponseWriter, r *http.Request, title string)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		submatch := validPath.FindStringSubmatch(r.URL.Path)
+		if submatch == nil {
+			http.NotFound(w, r)
+			return
+		}
+		fn(w, r, submatch[2])
+	}
+}
+
+func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	title, err := getTitle(w, r)
 	if err != nil {
 		return
@@ -73,7 +84,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
+func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	title, err := getTitle(w, r)
 	if err != nil {
 		return
@@ -86,7 +97,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "view", p)
 }
 
-func editHandler(w http.ResponseWriter, r *http.Request) {
+func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	title, err := getTitle(w, r)
 	if err != nil {
 		return
@@ -99,8 +110,8 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/save/", saveHandler)
-	http.HandleFunc("/view/", viewHandler)
-	http.HandleFunc("/edit/", editHandler)
+	http.HandleFunc("/save/", makeHandler(saveHandler))
+	http.HandleFunc("/view/", makeHandler(viewHandler))
+	http.HandleFunc("/edit/", makeHandler(editHandler))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
