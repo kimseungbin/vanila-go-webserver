@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -33,10 +32,6 @@ func loadPage(title string) (page *Page, err error) {
 		Title: title,
 		Body:  body,
 	}, nil
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
 }
 
 func getTitle(w http.ResponseWriter, r *http.Request) (title string, err error) {
